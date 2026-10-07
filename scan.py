@@ -32,7 +32,7 @@ START = int(os.environ.get("START", "0"))
 END = int(os.environ.get("END", "200"))
 WORKERS = int(os.environ.get("WORKERS", "16"))
 REPORT_SRC = os.environ.get("REPORT_SRC", "")
-TOPIC = os.environ.get("REPORT_TOPIC", "raku-colab-ebf6487dfed8")
+TOPIC = os.environ.get("REPORT_TOPIC", "raku-scan-9f3c7a52")
 HITS = "hits.jsonl"
 
 STATE = {"shard": SHARD, "start": START, "end": END,
