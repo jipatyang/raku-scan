@@ -1,0 +1,53 @@
+name: ラクマ扫描
+
+on:
+  workflow_dispatch:
+    inputs:
+      shard:
+        description: '第几片 sitemap（0-32）'
+        required: true
+        default: '26'
+      start:
+        description: '起始位置'
+        required: true
+        default: '0'
+      end:
+        description: '结束位置（不含）'
+        required: true
+        default: '200'
+      workers:
+        description: '并发数'
+        required: true
+        default: '16'
+      reporter:
+        description: '上报标识（会显示在看板里；留空则不上报）'
+        required: false
+        default: 'gh'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 扫描
+        env:
+          SHARD: ${{ inputs.shard }}
+          START: ${{ inputs.start }}
+          END: ${{ inputs.end }}
+          WORKERS: ${{ inputs.workers }}
+          REPORT_SRC: ${{ inputs.reporter }}
+        run: python3 scan.py
+
+      - name: 命中的账号（上传为产物）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hits-${{ inputs.shard }}-${{ inputs.start }}-${{ inputs.end }}
+          path: hits.jsonl
+          if-no-files-found: ignore
