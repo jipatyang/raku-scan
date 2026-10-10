@@ -1,0 +1,47 @@
+name: ラクマ货源挖掘
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: '每片起始位置'
+        required: true
+        default: '0'
+      end:
+        description: '每片结束位置（不含）'
+        required: true
+        default: '1500'
+      workers:
+        description: '并发数'
+        required: true
+        default: '16'
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      max-parallel: 10
+      fail-fast: false
+      matrix:
+        shard: [2, 5, 8, 11, 14, 17, 20, 23, 26, 29]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 挖评价页里的代购条目
+        env:
+          SHARD: ${{ matrix.shard }}
+          START: ${{ inputs.start }}
+          END: ${{ inputs.end }}
+          WORKERS: ${{ inputs.workers }}
+        run: python3 mine.py
+      - name: 上传产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: entries-shard${{ matrix.shard }}
+          path: entries.jsonl
+          if-no-files-found: ignore
+          retention-days: 14
